@@ -33,7 +33,8 @@ def main() -> int:
     m = DATA.search(html)
     try:
         data = json.loads(m.group(1).replace("<\\/", "</"))
-        assert data["series"]["^KS11"]["days"] and data["series"]["^GSPC"]["days"]
+        for key in ("069500.KS", "SPY", "114260.KS"):   # KODEX 200, SPY(원화), KODEX 국고채3년
+            assert data["series"][key]["days"], key
     except Exception as e:
         print("오류: 시세 데이터 블록이 비었거나 깨졌어요:", e)
         return 2

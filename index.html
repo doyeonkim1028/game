@@ -26,7 +26,8 @@
     --accent:#5fd3bf; --accent-soft:#163a34;
   }
   *{box-sizing:border-box}
-  html,body{overflow-x:hidden}
+  html{overflow-x:hidden}
+  body{overflow-x:clip}   /* hidden 이면 body 가 스크롤 상자가 되어 position:sticky(처방전 요약·문진 단계)가 안 붙음 */
   body{margin:0;font-family:'Noto Sans KR',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;justify-content:center;padding:28px 16px;transition:background .4s}
   .wrap{width:100%;max-width:640px;position:relative;z-index:1}
   .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:32px 28px;box-shadow:0 8px 30px rgba(20,60,55,.07);transition:background .4s,border-color .4s}
@@ -206,6 +207,7 @@
   .vital-row .px{text-align:right}
   .vital-row .px b{display:block;font-size:17px;font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap}
   .vital-row .px em{font-style:normal;font-size:13px;font-weight:900;font-variant-numeric:tabular-nums}
+  .vital-row .px small.usd{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sub)}
   .up{color:var(--stamp)} .down{color:#3d7bdc} .flat{color:var(--sub)}
   .vital-me{display:flex;gap:10px;align-items:flex-start;margin-top:10px;background:var(--accent-soft);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.6}
   .vital-me svg{width:20px;height:20px;color:var(--accent);margin-top:1px}
@@ -225,6 +227,9 @@
   .tm-fill.up{background:var(--stamp);left:50%}
   .tm-fill.down{background:#3d7bdc;right:50%}
   .tm-bar em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums}
+  .basis{font-size:11.5px;color:var(--sub);line-height:1.6;margin:12px 0 0;padding-top:10px;border-top:1px dashed var(--line)}
+  .basis b{font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+  .sim-cards + .basis{margin:-4px 0 12px;padding-top:0;border-top:0}
   .vital-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:11.5px;color:var(--sub);margin-top:8px}
   table{width:100%;border-collapse:collapse;font-size:13px}
   td{padding:8px 4px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -237,7 +242,82 @@
   .note{font-size:12px;color:var(--sub);line-height:1.6;margin-top:18px;padding-top:14px;border-top:1px dashed var(--line)}
   .copied{font-size:13px;color:var(--accent);text-align:center;margin-top:8px;min-height:18px}
 
-  @media (max-width:480px){
+  /* ===================== 반응형 배치 (휴대폰 ≤600 · 태블릿 601~999 · 컴퓨터 ≥1000) ===================== */
+  /* 문진표: 단계 체크리스트 (컴퓨터에서만 보임) */
+  .q-steps{display:none}
+  .q-steps ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+  .q-steps li{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;font-size:14px;color:var(--sub);border:1.5px solid transparent}
+  .q-steps li .st{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:11px;font-weight:900;font-family:'JetBrains Mono',monospace;background:var(--card)}
+  .q-steps li .st svg{width:14px;height:14px}
+  .q-steps li small{display:block;font-size:11.5px;color:var(--sub);font-weight:400;margin-top:1px}
+  .q-steps li.done{color:var(--ink)}
+  .q-steps li.done .st{background:var(--mint);border-color:var(--mint);color:#fff}
+  .q-steps li.now{color:var(--ink);font-weight:900;background:var(--accent-soft);border-color:var(--mint)}
+  .q-steps li.now .st{border-color:var(--mint);color:var(--accent)}
+  .key{display:none}
+  .key-hint{display:none}
+
+  /* 처방전: 탭 */
+  .tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:22px 0 4px;padding:4px;background:var(--soft);border:1px solid var(--line);border-radius:14px}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:1 0 auto;appearance:none;border:0;background:transparent;font:inherit;font-size:14px;font-weight:700;color:var(--sub);padding:10px 12px;border-radius:10px;cursor:pointer;white-space:nowrap}
+  .tab[aria-selected="true"]{background:var(--card);color:var(--accent);box-shadow:0 1px 4px rgba(20,60,55,.12)}
+  .tab:focus-visible{outline:2px solid var(--mint);outline-offset:1px}
+  .tab-panel>h3:first-child{margin-top:16px}
+  .rx-metrics.desk{display:none}
+  .rx-actions.side{display:none}
+  .rx-actions .row{margin-top:0}
+  .rx-actions.bottom{margin-top:22px}
+
+  @media (min-width:601px) and (max-width:999px){
+    .wrap{max-width:760px}
+  }
+  @media (min-width:1000px){
+    .wrap{max-width:1120px}
+    .card{padding:36px 40px}
+    /* 접수: 왼쪽 소개 · 오른쪽 접수 폼, 한 화면 */
+    body.s-start{align-items:center;padding-top:20px;padding-bottom:20px}
+    .s-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:48px;align-items:center}
+    .s-left .dept{margin-bottom:22px}
+    .s-left .dept-cap{margin:-14px 0 0}
+    .s-right{background:var(--soft);border:1px solid var(--line);border-radius:18px;padding:26px 24px}
+    .s-right .legal{margin-top:16px}
+    /* 문진표: 왼쪽 단계 · 오른쪽 질문 */
+    .q-grid{display:grid;grid-template-columns:240px 1fr;gap:40px;align-items:start}
+    .q-steps{display:block;position:sticky;top:20px;padding-right:28px;border-right:1.5px dashed var(--line)}
+    .q-steps .tag{margin-bottom:14px}
+    .q-main .q-head .tag{display:none}
+    .key{display:inline-grid;place-items:center;flex:none;margin-left:auto;min-width:22px;height:22px;padding:0 6px;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--sub);background:var(--card)}
+    .key-hint{display:block;font-size:12px;color:var(--sub);margin-top:14px}
+    /* 처방전: 왼쪽 요약(고정) · 오른쪽 탭 */
+    .rx{display:grid;grid-template-columns:360px minmax(0,1fr);gap:36px;align-items:start}
+    .rx-sum{position:sticky;top:20px;max-height:calc(100vh - 40px);overflow-y:auto;scrollbar-width:thin;padding-right:4px}
+    .rx-sum .rx-meta{grid-template-columns:1fr 1fr;column-gap:12px}
+    .rx-sum .rx-meta div{flex-direction:column;gap:1px;padding:7px 2px}
+    .rx-sum .rx-meta dt{font-size:11.5px}
+    .rx-sum .dx{padding:14px 16px;margin-top:14px}
+    .rx-sum .char{height:120px;margin:4px 0 6px}
+    .rx-sum .gauge{margin:18px 0 6px}
+    .rx-sum h3{margin:16px 0 8px}
+    .rx-sum .stat{padding:10px 12px}
+    .rx-sum .stat b{font-size:22px}
+    .rx-metrics.desk{display:block}
+    .rx-metrics.mob{display:none}
+    .rx-actions.side{display:block;margin-top:20px}
+    .rx-actions.bottom{display:none}
+    .tabs{margin-top:0}
+  }
+  @media (max-width:600px){
+    /* 휴대폰: 처방전 복사 · 다시 접수하기를 화면 맨 아래에 고정 */
+    body.s-result{padding-bottom:104px}
+    .rx-actions.bottom{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(20,60,55,.08)}
+    .rx-actions.bottom .copied{margin-top:6px;min-height:0}
+    .rx-actions.bottom .copied:empty{display:none}
+    .tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px}   /* 4개 탭이 한 줄에 안 들어가서 2×2 */
+    .tab{font-size:13.5px;padding:9px 8px}
+  }
+
+  @media (max-width:600px){
     .card{padding:26px 18px}
     .s-title{font-size:27px}
     .dept .n{font-size:10px}
@@ -267,7 +347,7 @@
 
 <!-- 아래 블록은 collect_market.py 가 실행될 때마다 자동으로 바꿔 씀 (손으로 고치지 마세요) -->
 <!-- MARKET_DATA:START -->
-<script id="market-data" type="application/json">{"updated":"2026-11-10 20:53","source":"Yahoo Finance","series":{"^KS11":{"name":"코스피","days":[{"date":"2026-11-10","close":5239.13,"change_pct":4.39}],"three_month":{"start_date":"2026-08-10","start_close":6299.66,"end_date":"2026-11-10","end_close":5239.13,"return_pct":-16.83,"path":[{"date":"2026-08-10","close":6299.66},{"date":"2026-08-18","close":6869.83},{"date":"2026-08-25","close":6742.74},{"date":"2026-09-01","close":6835.8},{"date":"2026-09-08","close":6954.52},{"date":"2026-09-15","close":6627.26},{"date":"2026-09-22","close":7017.91},{"date":"2026-10-01","close":6971.35},{"date":"2026-10-12","close":6384.24},{"date":"2026-10-19","close":5768.01},{"date":"2026-10-26","close":5469.47},{"date":"2026-11-02","close":5859.08},{"date":"2026-11-09","close":5018.85},{"date":"2026-11-10","close":5239.13}]}},"^GSPC":{"name":"S&P 500","days":[{"date":"2026-11-09","close":7549.94,"change_pct":2.35}],"three_month":{"start_date":"2026-08-10","start_close":7753.11,"end_date":"2026-11-09","end_close":7549.94,"return_pct":-2.62,"path":[{"date":"2026-08-10","close":7753.11},{"date":"2026-08-17","close":7745.06},{"date":"2026-08-24","close":7652.86},{"date":"2026-08-31","close":7686.14},{"date":"2026-09-08","close":7673.52},{"date":"2026-09-15","close":7585.73},{"date":"2026-09-22","close":7764.64},{"date":"2026-09-29","close":7670.84},{"date":"2026-10-06","close":7818.93},{"date":"2026-10-13","close":7805.45},{"date":"2026-10-20","close":7712.57},{"date":"2026-10-27","close":7722.6},{"date":"2026-11-03","close":7568.92},{"date":"2026-11-09","close":7549.94}]}}}}</script>
+<script id="market-data" type="application/json">{"updated":"2026-11-12 20:36","source":"Yahoo Finance","series":{"069500.KS":{"name":"KODEX 200","role":"국내주식","days":[{"date":"2026-11-12","close":84240.0,"change_pct":-0.35}],"three_month":{"start_date":"2026-08-12","end_date":"2026-11-12","return_pct":-18.3}},"SPY":{"name":"SPY","role":"해외주식","days":[{"date":"2026-11-11","close":1019597.0,"usd":759.81,"change_pct":1.17}],"three_month":{"start_date":"2026-08-12","end_date":"2026-11-11","return_pct":-6.59}},"114260.KS":{"name":"KODEX 국고채3년","role":"채권","days":[{"date":"2026-11-12","close":62595.0,"change_pct":0.02}],"three_month":{"start_date":"2026-08-12","end_date":"2026-11-12","return_pct":1.29}}}}</script>
 <!-- MARKET_DATA:END -->
 
 <script>
@@ -309,8 +389,6 @@ const QUESTIONS = [
     ["바로 전부 판다",1],["반만 판다",2],["더 오를 때까지 기다린다",3],["오히려 더 산다",4]]},
   { scene:"Ⅲ. 반응 검사", q:"어떤 상품이 가장 끌리나요?", opts:[
     ["원금 보장, 연 3%",1],["원금 손실 최대 −5%, 기대수익 연 5%",2],["손실 최대 −15%, 기대수익 연 9%",3],["손실 최대 −30%, 기대수익 연 15%",4],["손실 최대 −60%, 기대수익 연 30%",5]]},
-  { scene:"Ⅳ. 멘탈 검진", q:"감당할 수 있는 최대 손실은 어느 정도인가요?", opts:[
-    ["원금 손실은 절대 안 돼요",1],["−5%까지",2],["−10 ~ −20%",3],["−20 ~ −40%",4],["−40% 이상도 견딜 수 있어요",5]]},
   { scene:"Ⅳ. 멘탈 검진", q:"친구가 \"요즘 이 종목 3배 올랐대\"라고 한다면?", opts:[
     ["관심 없다. 내 예금이 최고",1],["궁금하지만 찾아보기만 한다",2],["공부해 보고 소액만 넣어본다",3],["분석해서 괜찮으면 꽤 넣는다",4],["바로 들어간다. 기회는 빨리 잡아야지",5]]},
 ];
@@ -354,22 +432,34 @@ const TYPES = [
 
 /* 추천 자산 비율: TYPES[].mix 순서 = [예금, 채권, 국내주식, 해외주식] */
 const ASSETS = [
-  { name:"예금", color:"#4fb3e8", desc:"원금이 보장되지만 수익이 낮아요" },
-  { name:"채권", color:"#3fae6a", desc:"정해진 이자를 받아 비교적 안정적이에요" },
-  { name:"국내주식", color:"#f08a24", desc:"수익이 클 수 있지만 가격이 크게 오르내려요 (코스피)" },
-  { name:"해외주식", color:"#8b5cf6", desc:"미국 대표 기업 500곳(S&P 500)에 나눠 투자해요" },
+  { name:"예금", color:"#4fb3e8", desc:"원금이 보장되지만 수익이 낮아요 · 은행 정기예금 (한국은행 평균 금리)" },
+  { name:"채권", color:"#3fae6a", desc:"정해진 이자를 받아 비교적 안정적이에요 · KODEX 국고채3년" },
+  { name:"국내주식", color:"#f08a24", desc:"수익이 클 수 있지만 가격이 크게 오르내려요 · KODEX 200 (코스피200)" },
+  { name:"해외주식", color:"#8b5cf6", desc:"미국 대표 기업 500곳에 나눠 투자해요 · SPY (S&P 500, 원화 환산)" },
 ];
+
+/* 예금 금리: 한국은행 '금융기관 가중평균금리' 예금은행 신규취급액 기준 저축성수신금리(연 %).
+   예금은 가입한 달의 금리로 고정됨. 새 달 금리는 직접 추가해야 함 (자동 갱신 안 됨). */
+const DEPOSIT_RATES = [
+  ['2020-01', 1.54],
+  ['2026-08', 3.21],
+  ['2026-09', 3.45],
+];
+const monthLabel = date => `${date.slice(0, 4)}년 ${Number(date.slice(5, 7))}월`;
+const depositRate = date => {                  // date: 'YYYY-MM-DD' → 그 달(또는 직전 달) 금리
+  const ym = date.slice(0, 7);
+  return (DEPOSIT_RATES.filter(([m]) => m <= ym).at(-1) || DEPOSIT_RATES[0])[1];
+};
 let charts = [];   // 결과 화면의 Chart.js 인스턴스 (화면 전환 시 정리)
 
-/* 2020 코로나 폭락장 시뮬레이션 데이터 (단순화한 근사치) */
+/* 2020 코로나 폭락장 시뮬레이션: 실제 상품의 2019년 12월 말 ~ 2020년 12월 말 월말 값
+   (야후 파이낸스, 배당 포함 수정주가. SPY 는 그날 원/달러 환율을 곱한 원화 값) */
 const SIM = {
   base: 1000,                                  // 만 원
-  kospi0: 2198,                                // 2019년 12월 말
-  kospi: [2119,1987,1754,1947,2029,2108,2249,2326,2327,2267,2591,2873],
-  sp0: 3231,                                   // S&P 500, 2019년 12월 말 (달러 기준, 환율 미반영)
-  sp:  [3226,2954,2585,2912,3044,3100,3271,3500,3363,3270,3622,3756],
-  bond:  m => m === 2 ? -0.01 : 0.002,         // 월별 수익률 (index 2 = 3월)
-  dep:   0.015 / 12,
+  kodex200: [25971.84,25216.18,23752.92,21040.42,22932.11,23780.29,24930.45,26630.94,27356.1,27658.63,26860.63,30911.11,35202.22],
+  spyKrw:   [338411.5,347276.2,326300.0,286815.8,322253.6,344571.3,339467.6,356810.8,380906.5,359459.5,340178.8,368770.7,376230.8],
+  bond3y:   [57000,57210,57545,57545,57730,58045,58050,58225,57980,58210,58105,58030,58055],
+  depRate:  depositRate('2020-01-02'),         // 2020년 1월 가입 정기예금 금리 (연 %)
   labels: ['시작','1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
 };
 const TYPE_HEX = ['#2f74b5','#2fa892','#c98e0c','#e06a2c','#E5484D'];
@@ -382,12 +472,12 @@ const SIM_COMMENT = {
 };
 function simulate(mix){
   const [d,b,s,f] = mix.map(x=>x/100);
-  let bf = 1; const out = [SIM.base];
-  for(let m=0;m<12;m++){
-    bf *= 1 + SIM.bond(m);
-    const df = Math.pow(1 + SIM.dep, m+1);
-    const sf = SIM.kospi[m] / SIM.kospi0;
-    const ff = SIM.sp[m] / SIM.sp0;
+  const out = [SIM.base];
+  for(let m=1;m<=12;m++){
+    const df = 1 + SIM.depRate / 100 * m / 12;          // 예금: 고정금리, 경과 개월만큼 이자
+    const bf = SIM.bond3y[m] / SIM.bond3y[0];
+    const sf = SIM.kodex200[m] / SIM.kodex200[0];
+    const ff = SIM.spyKrw[m] / SIM.spyKrw[0];
     out.push(SIM.base * (d*df + b*bf + s*sf + f*ff));
   }
   return out;   // [시작, 1월말 … 12월말] (만 원)
@@ -401,7 +491,7 @@ const DEFAULT_NICK = '익명 투자자';
 const DIAG_STEPS = ['문진표 확인 중', '위험회피도 측정 중', '처방전 작성 중'];
 
 /* ===================== 상태 ===================== */
-let step = -1;            // -1: 접수, 0~9: 문진표, 10: 진단 중, 11: 처방전
+let step = -1;            // -1: 접수, 0 ~ 문항수-1: 문진표, LOADING: 진단 중, RESULT: 처방전
 const LOADING = QUESTIONS.length, RESULT = QUESTIONS.length + 1;
 let answers = [];          // 각 문항에서 고른 선택지 index
 let nickname = '';
@@ -450,7 +540,8 @@ function renderStart(){
   const dept = TYPES.map((t,i)=>`<div style="--c:${TYPE_HEX[i]}"><span class="e">${t.emoji}</span><span class="n">${t.name}</span>
       <span class="dose">${[0,1,2,3,4].map(k=>`<i class="${k<=i?'on':''}"></i>`).join('')}</span></div>`).join('');
   app.innerHTML = `
-  <div class="fade">
+  <div class="fade s-grid">
+   <div class="s-left">
     <div class="clinic">
       <span class="clinic-logo">${ICON.steth()}</span>
       <div><b>투자성향 클리닉</b><small>RISK PROFILE CLINIC</small></div>
@@ -461,6 +552,8 @@ function renderStart(){
     <div class="sec-lbl">진료 과목</div>
     <div class="dept">${dept}</div>
     <div class="dept-cap">● 위험 용량</div>
+   </div>
+   <div class="s-right">
     <form id="startForm" autocomplete="off">
       <div class="ticket"><span>대기번호<b>${pad(ticketNo,3)}</b></span><span>대기 0명 · 약 2분</span></div>
       <label class="f-lbl" for="nick">환자명 (닉네임)</label>
@@ -469,6 +562,7 @@ function renderStart(){
     </form>
     <div class="hint">Enter 키로도 접수할 수 있어요</div>
     <p class="legal">게임용으로 단순화한 진단이며, 실제 투자 권유나 공식 투자성향 진단이 아닙니다.</p>
+   </div>
   </div>`;
   const input = document.getElementById('nick');
   input.oninput = () => { document.getElementById('cnt').textContent = `${input.value.length}/${NICK_MAX}`; };
@@ -484,16 +578,27 @@ function renderStart(){
 function renderQuestion(){
   setScreen('question');
   const Q = QUESTIONS[step];
+  // 단계(Ⅰ~Ⅳ) 목록: 이름, 문항 수, 상태(done/now/todo) — 컴퓨터 화면 왼쪽 체크리스트용
+  const stages = [];
+  QUESTIONS.forEach((q, i) => { const s = stages.at(-1); if(s && s.name === q.scene) s.last = i; else stages.push({ name:q.scene, first:i, last:i }); });
+  const stepList = stages.map((s, k) => {
+    const state = step > s.last ? 'done' : step >= s.first ? 'now' : 'todo';
+    return `<li class="${state}"${state === 'now' ? ' aria-current="step"' : ''}><span class="st">${state === 'done' ? ICON.check() : k + 1}</span><span>${s.name}<small>${s.last - s.first + 1}문항</small></span></li>`;
+  }).join('');
   app.innerHTML = `
-  <div class="fade">
+  <div class="fade q-grid">
+   <aside class="q-steps" aria-label="문진 단계"><span class="tag">${ICON.pill()} 문진표</span><ol>${stepList}</ol></aside>
+   <div class="q-main">
     <div class="q-head"><span class="tag">${ICON.pill()} 문진표</span><span>${displayName()}님 위험회피도 측정 중…</span></div>
     <div class="bar"><i id="pg"></i></div>
     <div class="q-meta"><span class="scene">${Q.scene}</span><span class="q-no">${step+1} / ${QUESTIONS.length}</span></div>
     <p class="q"><em>Q${step+1}.</em>${Q.q}</p>
     <div class="opts">
-      ${Q.opts.map((o,i)=>`<button class="opt ${answers[step]===i?'picked':''}" data-i="${i}"><span class="ck">${ICON.check()}</span><span>${o[0]}</span></button>`).join('')}
+      ${Q.opts.map((o,i)=>`<button class="opt ${answers[step]===i?'picked':''}" data-i="${i}"><span class="ck">${ICON.check()}</span><span>${o[0]}</span><kbd class="key" aria-hidden="true">${i+1}</kbd></button>`).join('')}
     </div>
+    <span class="key-hint">키보드 숫자 1~${Q.opts.length}로도 고를 수 있어요</span>
     <button class="back" id="back" ${step===0?'disabled':''}>← 이전 문항</button>
+   </div>
   </div>`;
   requestAnimationFrame(()=>{ const pg = document.getElementById('pg'); if(pg) pg.style.width = (step/QUESTIONS.length*100)+'%'; });
   app.querySelectorAll('.opt').forEach(b => b.onclick = () => {
@@ -504,6 +609,15 @@ function renderQuestion(){
   });
   document.getElementById('back').onclick = () => { if(step>0){ step--; render(); } };
 }
+
+/* 문진표에서 키보드 숫자 1~5로 선택 (입력칸에 쓰는 중이거나 조합키를 누르면 무시) */
+document.addEventListener('keydown', e => {
+  if(step < 0 || step >= LOADING || e.altKey || e.ctrlKey || e.metaKey) return;
+  if(e.target.closest && e.target.closest('input, textarea, select')) return;
+  const n = parseInt(e.key, 10);
+  const opts = app.querySelectorAll('.opt');
+  if(n >= 1 && n <= opts.length && !opts[n-1].disabled){ e.preventDefault(); opts[n-1].click(); }
+});
 
 function renderLoading(){
   setScreen('loading');
@@ -530,8 +644,33 @@ function renderResult(){
   setScreen('result');
   const { sum, max, tol, aversion, type } = score();
   const no = `${today('')}-${pad(ticketNo,4)}`;
+  // 게이지 + 검사 수치: 컴퓨터는 왼쪽 요약 카드에, 휴대폰·태블릿은 '소견·처방' 탭 맨 위에 보임
+  const metrics = cls => `
+    <div class="rx-metrics ${cls}">
+      <div class="gauge">
+        <div class="gauge-track"><div class="gauge-pin" style="left:0%"></div></div>
+        <div class="gauge-lbl">${TYPES.map(t=>`<span>${t.name}</span>`).join('')}</div>
+      </div>
+      <h3>${ICON.steth()} 검사 수치</h3>
+      <div class="stats">
+        <div class="stat"><b>${aversion}</b><span>위험회피도 (0~100, 높을수록 위험 회피)</span></div>
+        <div class="stat"><b>${tol}</b><span>위험감수도 (원점수 ${sum} / ${max})</span></div>
+      </div>
+    </div>`;
+  // 처방전 복사 · 다시 접수하기: 컴퓨터는 요약 카드 안(side), 그 외는 맨 아래(bottom, 휴대폰은 화면 하단 고정)
+  const actions = cls => `
+    <div class="rx-actions ${cls}">
+      <div class="row">
+        <button class="btn ghost" data-act="copy">처방전 복사</button>
+        <button class="btn" data-act="again">다시 접수하기</button>
+      </div>
+      <div class="copied" role="status"></div>
+    </div>`;
+  const market = marketSection(type);
+  const TABS = ['소견·처방', '자산 비율', '시장 바이탈', '2020 시뮬레이션'];
   app.innerHTML = `
-  <div class="fade">
+  <div class="fade rx">
+   <aside class="rx-sum">
     <div class="rx-head">
       <span class="rx-sym" aria-hidden="true">℞</span>
       <div><h2>처방전</h2><small>PRESCRIPTION · 투자성향 클리닉</small></div>
@@ -553,35 +692,39 @@ function renderResult(){
       <p class="one">${type.one}</p>
       <div class="stamp" aria-label="진단완료 도장"><b>진단완료</b><span>${type.name}</span><small>${today()}</small></div>
     </section>
+    ${metrics('desk')}
+    ${actions('side')}
+   </aside>
 
-    <div class="gauge">
-      <div class="gauge-track"><div class="gauge-pin" id="pin" style="left:0%"></div></div>
-      <div class="gauge-lbl">${TYPES.map(t=>`<span>${t.name}</span>`).join('')}</div>
+   <div class="rx-main">
+    <div class="tabs" role="tablist" aria-label="처방전 내용">
+      ${TABS.map((t,i)=> (i === 2 && !market) ? '' : `<button class="tab" role="tab" id="tab-${i}" aria-controls="panel-${i}" aria-selected="${i===0}" tabindex="${i===0?0:-1}" data-tab="${i}">${t}</button>`).join('')}
     </div>
 
-    <h3>${ICON.steth()} 검사 수치</h3>
-    <div class="stats">
-      <div class="stat"><b>${aversion}</b><span>위험회피도 (0~100, 높을수록 위험 회피)</span></div>
-      <div class="stat"><b>${tol}</b><span>위험감수도 (원점수 ${sum} / ${max})</span></div>
-    </div>
+    <section class="tab-panel" role="tabpanel" id="panel-0" aria-labelledby="tab-0">
+      ${metrics('mob')}
+      <h3>${ICON.pill()} 소견</h3>
+      <ul class="desc">${type.desc.map(d=>`<li>${d}</li>`).join('')}</ul>
+      <div class="fit">${ICON.capsule()}<span><b>처방 상품</b> · ${type.fit}</span></div>
+    </section>
 
-    <h3>${ICON.pill()} 소견</h3>
-    <ul class="desc">${type.desc.map(d=>`<li>${d}</li>`).join('')}</ul>
-    <div class="fit">${ICON.capsule()}<span><b>처방 상품</b> · ${type.fit}</span></div>
+    <section class="tab-panel" role="tabpanel" id="panel-1" aria-labelledby="tab-1" hidden>
+      <h3>${ICON.bag()} 조제 내역 · 추천 자산 비율</h3>
+      <div class="donut-wrap" id="donutWrap" role="img" aria-label="${type.name} 추천 자산 비율: ${ASSETS.map((a,i)=>`${a.name} ${type.mix[i]}%`).join(', ')}">
+        <canvas id="donut"></canvas>
+        <div class="donut-center"><b>${charPic(type, 'sm')}</b><span>${type.name}</span></div>
+      </div>
+      <ul class="assets">
+        ${ASSETS.map((a,i)=>`<li>${ICON.capsule(a.color)}<b>${a.name}</b><em>${type.mix[i]}%</em><small>${a.desc}</small></li>`).join('')}
+      </ul>
+      <p class="fine">재미로 보는 예시 비율이며 실제 투자 권유가 아닙니다.</p>
+    </section>
 
-    <h3>${ICON.bag()} 조제 내역 · 추천 자산 비율</h3>
-    <div class="donut-wrap" id="donutWrap" role="img" aria-label="${type.name} 추천 자산 비율: ${ASSETS.map((a,i)=>`${a.name} ${type.mix[i]}%`).join(', ')}">
-      <canvas id="donut"></canvas>
-      <div class="donut-center"><b>${charPic(type, 'sm')}</b><span>${type.name}</span></div>
-    </div>
-    <ul class="assets">
-      ${ASSETS.map((a,i)=>`<li>${ICON.capsule(a.color)}<b>${a.name}</b><em>${type.mix[i]}%</em><small>${a.desc}</small></li>`).join('')}
-    </ul>
-    <p class="fine">재미로 보는 예시 비율이며 실제 투자 권유가 아닙니다.</p>
+    ${market ? `<section class="tab-panel" role="tabpanel" id="panel-2" aria-labelledby="tab-2" hidden>${market}</section>` : ''}
 
-    ${marketSection(type)}
-
-    ${simSection(type)}
+    <section class="tab-panel" role="tabpanel" id="panel-3" aria-labelledby="tab-3" hidden>
+      ${simSection(type)}
+    </section>
 
     <details>
       <summary>문진 기록 보기 (답변별 점수)</summary>
@@ -592,24 +735,40 @@ function renderResult(){
 
     <div class="rx-sign">위와 같이 처방합니다. <b>투자성향 클리닉</b><i aria-hidden="true">인</i></div>
 
-    <div class="row" style="margin-top:20px">
-      <button class="btn ghost" id="copy">처방전 복사</button>
-      <button class="btn" id="again">다시 접수하기</button>
-    </div>
-    <div class="copied" id="msg"></div>
-
     <p class="note">※ 점수 구간: 위험감수도 0~20 안정형 · 21~40 안정추구형 · 41~60 위험중립형 · 61~80 적극투자형 · 81~100 공격투자형.
     분류 체계는 금융투자협회 표준 투자자정보확인서의 5단계를 참고했으며, 문항과 배점은 게임용으로 단순화한 것입니다. 실제 투자 권유나 금융기관의 공식 투자성향 진단을 대신하지 않아요.</p>
-  </div>`;
-  drawDonut(type);
-  drawSim(type);
-  later(()=>{ const pin = document.getElementById('pin'); if(pin) pin.style.left = Math.min(98,Math.max(2,tol))+'%'; }, 80);
-  document.getElementById('again').onclick = () => { step = -1; render(); };
-  document.getElementById('copy').onclick = async () => {
-    const text = `[${nickname || DEFAULT_NICK}님의 처방전] ${type.emoji} ${type.name}${type.char ? ` (${type.char})` : ''}\n위험회피도 ${aversion}/100 · 위험감수도 ${tol}/100\n${type.one}\n처방 상품: ${type.fit}`;
-    try { await navigator.clipboard.writeText(text); document.getElementById('msg').textContent = '복사했어요!'; }
-    catch(e){ document.getElementById('msg').textContent = '복사가 막혀 있어요. 화면을 캡처해 공유해 주세요.'; }
+   </div>
+  </div>
+  ${actions('bottom')}`;   /* .fade(transform 애니메이션) 밖에 둬야 하단 고정이 흔들리지 않음 */
+
+  // 탭: 숨겨진 탭의 그래프는 그 탭을 처음 열 때 그림 (숨긴 상태로 그리면 크기가 0이 되어 깨짐)
+  const drawn = {};
+  const openTab = i => {
+    app.querySelectorAll('.tab').forEach(b => { const on = +b.dataset.tab === i; b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; });
+    app.querySelectorAll('.tab-panel').forEach(p => { p.hidden = p.id !== `panel-${i}`; });
+    if(i === 1 && !drawn[1]){ drawn[1] = true; drawDonut(type); }
+    if(i === 3 && !drawn[3]){ drawn[3] = true; drawSim(type); }
   };
+  const tabBtns = [...app.querySelectorAll('.tab')];
+  tabBtns.forEach((b, k) => {
+    b.onclick = () => openTab(+b.dataset.tab);
+    b.onkeydown = e => {                            // 탭 목록에서 ←/→ 로 이동
+      const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if(!d) return;
+      e.preventDefault();
+      const nb = tabBtns[(k + d + tabBtns.length) % tabBtns.length];
+      nb.focus(); openTab(+nb.dataset.tab);
+    };
+  });
+
+  later(()=>{ app.querySelectorAll('.gauge-pin').forEach(pin => pin.style.left = Math.min(98,Math.max(2,tol))+'%'); }, 80);
+  const say = t => app.querySelectorAll('.copied').forEach(m => m.textContent = t);
+  app.querySelectorAll('[data-act="again"]').forEach(b => b.onclick = () => { step = -1; render(); });
+  app.querySelectorAll('[data-act="copy"]').forEach(b => b.onclick = async () => {
+    const text = `[${nickname || DEFAULT_NICK}님의 처방전] ${type.emoji} ${type.name}${type.char ? ` (${type.char})` : ''}\n위험회피도 ${aversion}/100 · 위험감수도 ${tol}/100\n${type.one}\n처방 상품: ${type.fit}`;
+    try { await navigator.clipboard.writeText(text); say('복사했어요!'); }
+    catch(e){ say('복사가 막혀 있어요. 화면을 캡처해 공유해 주세요.'); }
+  });
 }
 
 /* ===================== 오늘의 시장 바이탈 =====================
@@ -619,7 +778,7 @@ const MARKET = (() => {
   try { return JSON.parse(document.getElementById('market-data').textContent); } catch(e) { return null; }
 })();
 const MARKET_TARGET = 10;
-const MARKET_KEYS = [['^KS11', 2], ['^GSPC', 3]];   // [티커, ASSETS/mix 인덱스: 국내주식, 해외주식]
+const MARKET_KEYS = [['069500.KS', 2], ['SPY', 3], ['114260.KS', 1]];   // [티커, ASSETS/mix 인덱스]
 
 function sparkSvg(days){
   if(days.length < 2) return '<svg class="spark" aria-hidden="true"></svg>';
@@ -639,50 +798,57 @@ function marketSection(type){
   if(!rows.length) return '';
   const collected = Math.max(...rows.map(r => r.s.days.length));
 
-  // 내 처방 비율이면 오늘 주식 부분이 전체 자산에 준 영향 (각 지수의 가장 최근 등락률 × 비중)
+  // 내 처방 비율이면 최근 거래일 상품 가격 변동이 전체 자산에 준 영향 (각 상품 등락률 × 비중, 예금은 변동 없음)
   let impact = 0, used = 0;
   rows.forEach(r => { const c = r.s.days.at(-1).change_pct; if(c != null){ impact += c * type.mix[r.ai] / 100; used++; } });
-  const stockPct = rows.reduce((a, r) => a + type.mix[r.ai], 0);
+  const stockPct = type.mix[2] + type.mix[3];
+  const dep = depositRate(rows[0].s.days.at(-1).date);
+  const depMonth = Number(DEPOSIT_RATES.at(-1)[0].slice(5, 7));      // 가장 최근 공표된 달
+  const won0 = v => `${Math.round(v).toLocaleString('ko-KR')}원`;
 
   return `
-    <h3>${ICON.steth()} 오늘의 시장 바이탈 · 실제 지수</h3>
+    <h3>${ICON.steth()} 오늘의 시장 바이탈 · 실제 상품</h3>
     <div class="vital">
       ${rows.map(r => { const d = r.s.days.at(-1); return `
       <div class="vital-row">
-        <div class="nm"><b>${esc(r.s.name)}</b><small>${shortDate(d.date)} 종가</small></div>
+        <div class="nm"><b>${esc(r.s.name)}</b><small>${esc(r.s.role || '')} · ${shortDate(d.date)} 종가</small></div>
         ${sparkSvg(r.s.days)}
-        <div class="px"><b>${d.close.toLocaleString('ko-KR', {minimumFractionDigits:2, maximumFractionDigits:2})}</b><em class="${chgCls(d.change_pct)}">${chgTxt(d.change_pct)}</em></div>
+        <div class="px"><b>${won0(d.close)}</b><em class="${chgCls(d.change_pct)}">${chgTxt(d.change_pct)}</em>${d.usd ? `<small class="usd">$${d.usd.toFixed(2)}</small>` : ''}</div>
       </div>`; }).join('')}
+      <div class="vital-row">
+        <div class="nm"><b>정기예금</b><small>예금 · 한국은행 ${depMonth}월 평균</small></div>
+        <svg class="spark" aria-hidden="true"></svg>
+        <div class="px"><b>연 ${dep.toFixed(2)}%</b><em class="flat">원금 보장</em></div>
+      </div>
     </div>
-    ${!stockPct ? `<div class="vital-me">${ICON.pill()}<span>${type.name} 처방에는 주식이 없어서, 오늘 지수가 어떻게 움직여도 자산은 거의 그대로예요.</span></div>`
-      : used ? `<div class="vital-me">${ICON.pill()}<span>${type.name} 처방(주식 ${stockPct}%)이라면 최근 거래일 주식 부분 때문에 전체 자산이 약 <b class="${chgCls(impact)}">${impact >= 0 ? '+' : '−'}${Math.abs(impact).toFixed(2)}%</b> 움직였어요.</span></div>` : ''}
+    ${!stockPct ? `<div class="vital-me">${ICON.pill()}<span>${type.name} 처방에는 주식이 없어서, 오늘 주가가 어떻게 움직여도 자산은 거의 그대로예요.</span></div>`
+      : used ? `<div class="vital-me">${ICON.pill()}<span>${type.name} 처방(주식 ${stockPct}%)이라면 최근 거래일 가격 변동 때문에 전체 자산이 약 <b class="${chgCls(impact)}">${impact >= 0 ? '+' : '−'}${Math.abs(impact).toFixed(2)}%</b> 움직였어요.</span></div>` : ''}
     ${threeMonth(type)}
     <div class="vital-meta"><span>출처 Yahoo Finance · ${esc(MARKET.updated || '')} 수집</span><span>${collected >= MARKET_TARGET ? `최근 ${MARKET_TARGET}거래일` : `수집 ${collected}/${MARKET_TARGET}거래일`}</span></div>
-    <p class="fine">실제 지수지만 수집 시점 기준이며 실시간이 아닙니다. 3개월 수익률의 예금·채권은 단순 가정(연 1.5%, 월 +0.2%), 해외주식은 환율 미반영. 투자 권유가 아닙니다.</p>`;
+    <p class="fine">실제 상품 가격(수집 시점 기준, 실시간 아님). 수익률은 배당 포함, SPY는 원/달러 환율을 반영한 원화 기준. 예금은 한국은행 예금은행 저축성수신금리(신규취급액)를 가입 달 기준으로 적용, 중도해지 불이익은 무시. 수수료·세금 미반영. 투자 권유가 아닙니다.</p>`;
 }
 
-/* 지난 3개월 동안 처방 비율로 투자했다면? (지수는 실제 값, 예금·채권은 2020 시뮬레이션과 같은 가정) */
-const TM_DEP = Math.pow(1 + SIM.dep, 3) - 1;          // 예금 연 1.5% → 3개월
-const TM_BOND = Math.pow(1.002, 3) - 1;               // 채권 월 +0.2% → 3개월
-function threeMonthReturn(mix, k, s){                 // k, s: 코스피·S&P 500 3개월 수익률(%)
-  const [d, b, ks, sp] = mix.map(x => x / 100);
-  return (d * TM_DEP + b * TM_BOND + ks * k / 100 + sp * s / 100) * 100;
-}
+/* 지난 3개월 동안 처방 비율로 투자했다면? (실제 상품: KODEX 200, SPY 원화 환산, KODEX 국고채3년 + 가입 달 정기예금 금리) */
 function threeMonth(type){
-  const k = MARKET.series['^KS11'] && MARKET.series['^KS11'].three_month;
-  const s = MARKET.series['^GSPC'] && MARKET.series['^GSPC'].three_month;
-  if(!k || !s) return '';
-  const rets = TYPES.map(t => threeMonthReturn(t.mix, k.return_pct, s.return_pct));
+  const tm = key => MARKET.series[key] && MARKET.series[key].three_month;
+  const k = tm('069500.KS'), s = tm('SPY'), b = tm('114260.KS');
+  if(!k || !s || !b) return '';
+  const days = (Date.parse(k.end_date) - Date.parse(k.start_date)) / 864e5;
+  const depRet = depositRate(k.start_date) * days / 365;            // 예금: 가입 달 금리 × 경과 일수
+  const ret = mix => (mix[0] * depRet + mix[1] * b.return_pct + mix[2] * k.return_pct + mix[3] * s.return_pct) / 100;
+  const rets = TYPES.map(t => ret(t.mix));
   const mine = rets[TYPES.indexOf(type)];
   const maxAbs = Math.max(...rets.map(Math.abs), 0.01);
+  const part = (label, v) => `${label} <span class="${chgCls(v)}">${pct(v)}</span>`;
   return `
     <div class="tm">
       <span class="tm-lbl">3개월 전에 ${type.name} 비율로 1,000만 원을 투자했다면?</span>
       <div class="tm-big"><b>${won(SIM.base * (1 + mine / 100))}</b><em class="${chgCls(mine)}">${pct(mine)}</em></div>
-      <div class="tm-sub">${shortDate(k.start_date)} → ${shortDate(k.end_date)} · 코스피 <span class="${chgCls(k.return_pct)}">${pct(k.return_pct)}</span> · S&amp;P 500 <span class="${chgCls(s.return_pct)}">${pct(s.return_pct)}</span></div>
+      <div class="tm-sub">${shortDate(k.start_date)} → ${shortDate(k.end_date)} · ${part('KODEX 200', k.return_pct)} · ${part('SPY', s.return_pct)}</div>
       <div class="tm-bars" role="img" aria-label="지난 3개월 유형별 수익률: ${TYPES.map((t,i)=>`${t.name} ${pct(rets[i])}`).join(', ')}">
         ${TYPES.map((t,i) => `<div class="tm-bar${t === type ? ' me' : ''}"><span>${t === type ? '★ ' : ''}${t.name}</span><div class="tm-track"><div class="tm-fill ${rets[i] >= 0 ? 'up' : 'down'}" style="width:${(Math.abs(rets[i]) / maxAbs * 50).toFixed(1)}%"></div></div><em class="${chgCls(rets[i])}">${pct(rets[i])}</em></div>`).join('')}
       </div>
+      <p class="basis">예금 연 ${depositRate(k.start_date).toFixed(2)}%(${monthLabel(k.start_date)} 한국은행 평균) × ${Math.round(days)}일 = <b>${pct(depRet)}</b> · 채권 KODEX 국고채3년 같은 기간 <b>${pct(b.return_pct)}</b>(배당 포함)</p>
     </div>`;
 }
 
@@ -700,8 +866,9 @@ function simSection(type){
       <div class="sim-card"><span>최종 · 12월 말</span><b>${won(end)}</b><em class="${endR>=0?'pos':'neg'}">${pct(endR)}</em></div>
       <div class="sim-card sim-say"><span>한 줄 코멘트</span><p>${SIM_COMMENT[type.name]}</p></div>
     </div>
+    <p class="basis">예금 연 ${SIM.depRate.toFixed(2)}%(2020년 1월 한국은행 평균) → 1년 <b>${pct(SIM.depRate)}</b> · 채권 KODEX 국고채3년 2020년 <b>${pct((SIM.bond3y[12] / SIM.bond3y[0] - 1) * 100)}</b>, 3월 말 <b>${pct((SIM.bond3y[3] / SIM.bond3y[0] - 1) * 100)}</b></p>
     <div class="sim-chart"><canvas id="simChart" role="img" aria-label="2020년 월별 자산 변화: ${type.name} 12월 말 ${won(end)}"></canvas></div>
-    <p class="fine">과거 지수를 단순화한 모의 계산이며 미래 수익을 보장하지 않습니다.<br>국내주식=코스피, 해외주식=S&amp;P 500 월말 지수 근사치(환율 변동 미반영)</p>`;
+    <p class="fine">과거 실제 상품 가격으로 계산한 모의 결과이며 미래 수익을 보장하지 않습니다.<br>KODEX 200 · SPY(원화 환산) · KODEX 국고채3년 월말 값(배당 포함), 예금 연 ${SIM.depRate.toFixed(2)}%(2020년 1월 한국은행 평균). 수수료·세금 미반영.</p>`;
 }
 
 function drawSim(type){
