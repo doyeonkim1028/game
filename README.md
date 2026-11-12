@@ -108,6 +108,32 @@
 - Claude 앱이 켜져 있을 때만 실행되고, 꺼져 있었다면 다음에 앱을 켤 때 실행됩니다.
 - 첫 수집일부터 10거래일이 모이면 "수집 완료"로 표시됩니다 (주말·휴장일 제외).
 
+## 결과 저장 (Supabase)
+
+설문을 끝까지 마치고 **위험선호형(적극투자형·공격투자형)**으로 진단된 경우에만 결과가 Supabase 프로젝트 "game test"의 `public.invest_results` 테이블에 한 줄씩 저장됩니다 (설문 1회당 1번). 다른 유형은 게임 코드(`SAVE_TYPES`)에서 전송하지 않습니다.
+
+> DB 쪽 보안 규칙은 아직 모든 유형을 받습니다. 공개 키로 직접 저장하는 우회까지 막으려면 SQL Editor에서 아래를 실행하세요.
+> ```sql
+> drop policy "누구나 결과 저장 가능" on public.invest_results;
+> create policy "위험선호형 결과만 저장 가능" on public.invest_results for insert
+>   to anon, authenticated with check (type_name in ('적극투자형','공격투자형'));
+> ```
+
+| 열 | 내용 |
+|---|---|
+| `created_at` | 저장 시각 |
+| `nickname` | 닉네임 (비우면 빈 값) |
+| `type_name` | 유형 (안정형 ~ 공격투자형) |
+| `risk_tolerance` / `risk_aversion` | 위험감수도 / 위험회피도 (0~100) |
+| `raw_score` / `max_score` | 원점수 / 만점 |
+| `answers` | 문항 순서대로 고른 선택지 점수 |
+
+- 페이지에는 공개(publishable) 키만 들어 있고, 보안 규칙(RLS)으로 **저장만** 허용합니다. 이 키로는 조회·수정·삭제가 안 됩니다.
+- 결과 확인: Supabase 대시보드 → Table Editor → `invest_results`
+- 유형별 인원 수: SQL Editor에서 `select type_name, count(*) from invest_results group by 1 order by 2 desc;`
+- 저장에 실패해도 게임은 그대로 진행됩니다.
+- **주의:** 게임 링크(Claude 아티팩트)는 외부 사이트 접속이 막혀 있어서, 그 링크에서는 저장되지 않습니다. 저장은 `index.html`을 직접 열거나 일반 웹 호스팅에 올렸을 때 동작합니다.
+
 ## 직접 실행하기
 
 Python 3.12 기준이며, 표준 라이브러리만 쓰므로 따로 설치할 패키지가 없습니다.

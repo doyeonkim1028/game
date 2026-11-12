@@ -144,6 +144,12 @@
   .dx .lbl{font-size:12px;font-weight:900;color:var(--sub)}
   .char{height:170px;margin:8px 0 8px;display:flex;align-items:flex-end}
   .char img{height:100%;width:auto;max-width:100%;object-fit:contain;animation:pop .5s cubic-bezier(.2,1.4,.4,1) both}
+  /* 캐릭터 3D 반응: 마우스 위치를 따라 기울고(--rx/--ry) 살짝 커지며, 그림자는 반대쪽으로 */
+  .tilt-zone{display:inline-block;height:100%}   /* 기울지 않는 바깥 상자: 마우스 위치는 여기 기준으로 계산 */
+  .tilt{display:inline-block;height:100%;transform:perspective(600px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) scale(var(--ts,1));
+    filter:drop-shadow(var(--sx,0px) var(--sy,6px) 10px rgba(20,60,55,.18));transition:transform .45s cubic-bezier(.2,.8,.2,1),filter .45s;will-change:transform}
+  .tilt.on{transition:transform .08s linear,filter .08s linear}
+  .tilt>img{max-width:none}   /* 감싼 상자 폭이 그림 폭을 따라가야 해서 % 제한을 풂 (안 그러면 폭 0) */
   .char-emoji{display:grid;place-items:center;width:120px;height:120px;border-radius:50%;background:var(--card);border:1px solid var(--line);font-size:60px;line-height:1}
   @keyframes pop{from{opacity:0;transform:scale(.7) translateY(10px)}to{opacity:1;transform:none}}
   .char-tag{display:inline-block;font-size:12.5px;font-weight:700;color:var(--accent);background:var(--accent-soft);padding:4px 10px;border-radius:999px;margin:0 0 8px}
@@ -337,6 +343,7 @@
   }
   @media (prefers-reduced-motion: reduce){
     .props span,.open i,.cta,.diag-icon,.diag-title i,.ecg polyline,.diag-pills span,.stamp,.fade,.leaving,.char img{animation:none}
+    .tilt{transform:none!important}
     .ecg polyline{stroke-dashoffset:0}
   }
 </style>
@@ -509,6 +516,33 @@ const charPic = (t, cls='') => t.img
   ? `<img class="${cls}" src="${CHAR_IMG[t.img]}" alt="${t.name} ${t.char}">`
   : `<span class="char-emoji ${cls}" role="img" aria-label="${t.name}">${t.emoji}</span>`;
 
+/* ===================== 결과 저장 (Supabase) =====================
+   설문을 끝낸 사람의 결과를 public.invest_results 에 한 줄 저장.
+   공개(publishable) 키라 페이지에 넣어도 되는 키이고, RLS로 '저장만' 허용 — 조회·수정·삭제는 불가.
+   저장에 실패해도 게임은 그대로 진행 (오프라인·차단 환경 대비). */
+const SUPABASE_URL = 'https://nezlnfkzkwpubmcsefom.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_k_N4MlX1XPdrH-kI04YB2Q_CEqGrogl';
+let resultSaved = false;   // 한 번의 설문당 한 번만 저장 (접수할 때 false로 초기화)
+const SAVE_TYPES = ['적극투자형', '공격투자형'];   // 위험선호형만 저장 (DB 보안 규칙도 이 두 유형만 허용)
+function saveResult({ sum, max, tol, type }){
+  if(resultSaved || !SAVE_TYPES.includes(type.name)) return;
+  resultSaved = true;
+  try {
+    fetch(`${SUPABASE_URL}/rest/v1/invest_results`, {
+      method: 'POST', keepalive: true,
+      headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        nickname: nickname || null,
+        type_name: type.name,
+        risk_tolerance: tol,
+        raw_score: sum,
+        max_score: max,
+        answers: answers.map((a, i) => QUESTIONS[i].opts[a][1]),
+      }),
+    }).catch(() => {});
+  } catch(e) {}
+}
+
 function score(){
   const sum = answers.reduce((s,a,i)=> s + QUESTIONS[i].opts[a][1], 0);
   const max = QUESTIONS.reduce((s,Q)=> s + Q.opts.length, 0);              // 만점 (5지선다 5점, 4지선다 4점)
@@ -559,7 +593,7 @@ function renderStart(){
       <button class="btn cta" type="submit">${ICON.bag()} 접수하기</button>
     </form>
     <div class="hint">Enter 키로도 접수할 수 있어요</div>
-    <p class="legal">게임용으로 단순화한 진단이며, 실제 투자 권유나 공식 투자성향 진단이 아닙니다.</p>
+    <p class="legal">게임용으로 단순화한 진단이며, 실제 투자 권유나 공식 투자성향 진단이 아닙니다.<br>적극·공격투자형으로 진단되면 결과(닉네임·유형·점수·답변)가 통계용으로 저장돼요.</p>
    </div>
   </div>`;
   const input = document.getElementById('nick');
@@ -569,7 +603,7 @@ function renderStart(){
     nickname = input.value.trim().slice(0, NICK_MAX);
     try { nickname ? localStorage.setItem(NICK_KEY, nickname) : localStorage.removeItem(NICK_KEY); } catch(err) {}
     app.firstElementChild.classList.add('leaving');
-    later(()=>{ step = 0; answers = []; render(); }, reduceMotion ? 0 : 320);
+    later(()=>{ step = 0; answers = []; resultSaved = false; render(); }, reduceMotion ? 0 : 320);
   };
 }
 
@@ -606,6 +640,29 @@ function renderQuestion(){
     later(()=>{ step++; render(); }, 220);
   });
   document.getElementById('back').onclick = () => { if(step>0){ step--; render(); } };
+}
+
+/* 캐릭터 그림 3D 반응 (마우스가 있는 기기에서만, 움직임 줄이기 설정이면 끔) */
+const TILT_MAX = 14;   // 최대 기울기(도)
+function addTilt(el){
+  if(reduceMotion || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  const zone = el.parentElement;   // .tilt-zone (기울지 않음) — 기운 그림으로 위치를 재면 가장자리에서 방향이 뒤집힘
+  const set = (k, v) => el.style.setProperty(k, v);
+  zone.addEventListener('pointermove', e => {
+    const b = zone.getBoundingClientRect();
+    if(!b.width || !b.height) return;
+    const x = (e.clientX - b.left) / b.width - .5, y = (e.clientY - b.top) / b.height - .5;   // -0.5 ~ 0.5
+    el.classList.add('on');
+    set('--ry', `${(x * 2 * TILT_MAX).toFixed(1)}deg`);
+    set('--rx', `${(-y * 2 * TILT_MAX).toFixed(1)}deg`);
+    set('--ts', '1.06');
+    set('--sx', `${(-x * 18).toFixed(1)}px`);
+    set('--sy', `${(10 - y * 12).toFixed(1)}px`);
+  });
+  zone.addEventListener('pointerleave', () => {
+    el.classList.remove('on');
+    ['--rx', '--ry', '--ts', '--sx', '--sy'].forEach(k => el.style.removeProperty(k));
+  });
 }
 
 /* 문진표에서 키보드 숫자 1~5로 선택 (입력칸에 쓰는 중이거나 조합키를 누르면 무시) */
@@ -683,7 +740,7 @@ function renderResult(){
 
     <section class="dx">
       <span class="lbl">진단명</span>
-      <div class="char">${charPic(type)}</div>
+      <div class="char"><span class="tilt-zone"><span class="tilt">${charPic(type)}</span></span></div>
       <div class="who">${displayName()}님은</div>
       <div class="rtype" style="color:${type.color}">${type.name}</div>
       ${type.char ? `<span class="char-tag">${type.char} · ${type.motto}</span>` : ''}
@@ -759,6 +816,8 @@ function renderResult(){
     };
   });
 
+  app.querySelectorAll('.tilt').forEach(addTilt);
+  saveResult({ sum, max, tol, type });
   later(()=>{ app.querySelectorAll('.gauge-pin').forEach(pin => pin.style.left = Math.min(98,Math.max(2,tol))+'%'); }, 80);
   const say = t => app.querySelectorAll('.copied').forEach(m => m.textContent = t);
   app.querySelectorAll('[data-act="again"]').forEach(b => b.onclick = () => { step = -1; render(); });

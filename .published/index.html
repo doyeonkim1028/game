@@ -144,6 +144,12 @@
   .dx .lbl{font-size:12px;font-weight:900;color:var(--sub)}
   .char{height:170px;margin:8px 0 8px;display:flex;align-items:flex-end}
   .char img{height:100%;width:auto;max-width:100%;object-fit:contain;animation:pop .5s cubic-bezier(.2,1.4,.4,1) both}
+  /* 캐릭터 3D 반응: 마우스 위치를 따라 기울고(--rx/--ry) 살짝 커지며, 그림자는 반대쪽으로 */
+  .tilt-zone{display:inline-block;height:100%}   /* 기울지 않는 바깥 상자: 마우스 위치는 여기 기준으로 계산 */
+  .tilt{display:inline-block;height:100%;transform:perspective(600px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) scale(var(--ts,1));
+    filter:drop-shadow(var(--sx,0px) var(--sy,6px) 10px rgba(20,60,55,.18));transition:transform .45s cubic-bezier(.2,.8,.2,1),filter .45s;will-change:transform}
+  .tilt.on{transition:transform .08s linear,filter .08s linear}
+  .tilt>img{max-width:none}   /* 감싼 상자 폭이 그림 폭을 따라가야 해서 % 제한을 풂 (안 그러면 폭 0) */
   .char-emoji{display:grid;place-items:center;width:120px;height:120px;border-radius:50%;background:var(--card);border:1px solid var(--line);font-size:60px;line-height:1}
   @keyframes pop{from{opacity:0;transform:scale(.7) translateY(10px)}to{opacity:1;transform:none}}
   .char-tag{display:inline-block;font-size:12.5px;font-weight:700;color:var(--accent);background:var(--accent-soft);padding:4px 10px;border-radius:999px;margin:0 0 8px}
@@ -337,6 +343,7 @@
   }
   @media (prefers-reduced-motion: reduce){
     .props span,.open i,.cta,.diag-icon,.diag-title i,.ecg polyline,.diag-pills span,.stamp,.fade,.leaving,.char img{animation:none}
+    .tilt{transform:none!important}
     .ecg polyline{stroke-dashoffset:0}
   }
 </style>
@@ -608,6 +615,29 @@ function renderQuestion(){
   document.getElementById('back').onclick = () => { if(step>0){ step--; render(); } };
 }
 
+/* 캐릭터 그림 3D 반응 (마우스가 있는 기기에서만, 움직임 줄이기 설정이면 끔) */
+const TILT_MAX = 14;   // 최대 기울기(도)
+function addTilt(el){
+  if(reduceMotion || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  const zone = el.parentElement;   // .tilt-zone (기울지 않음) — 기운 그림으로 위치를 재면 가장자리에서 방향이 뒤집힘
+  const set = (k, v) => el.style.setProperty(k, v);
+  zone.addEventListener('pointermove', e => {
+    const b = zone.getBoundingClientRect();
+    if(!b.width || !b.height) return;
+    const x = (e.clientX - b.left) / b.width - .5, y = (e.clientY - b.top) / b.height - .5;   // -0.5 ~ 0.5
+    el.classList.add('on');
+    set('--ry', `${(x * 2 * TILT_MAX).toFixed(1)}deg`);
+    set('--rx', `${(-y * 2 * TILT_MAX).toFixed(1)}deg`);
+    set('--ts', '1.06');
+    set('--sx', `${(-x * 18).toFixed(1)}px`);
+    set('--sy', `${(10 - y * 12).toFixed(1)}px`);
+  });
+  zone.addEventListener('pointerleave', () => {
+    el.classList.remove('on');
+    ['--rx', '--ry', '--ts', '--sx', '--sy'].forEach(k => el.style.removeProperty(k));
+  });
+}
+
 /* 문진표에서 키보드 숫자 1~5로 선택 (입력칸에 쓰는 중이거나 조합키를 누르면 무시) */
 document.addEventListener('keydown', e => {
   if(step < 0 || step >= LOADING || e.altKey || e.ctrlKey || e.metaKey) return;
@@ -683,7 +713,7 @@ function renderResult(){
 
     <section class="dx">
       <span class="lbl">진단명</span>
-      <div class="char">${charPic(type)}</div>
+      <div class="char"><span class="tilt-zone"><span class="tilt">${charPic(type)}</span></span></div>
       <div class="who">${displayName()}님은</div>
       <div class="rtype" style="color:${type.color}">${type.name}</div>
       ${type.char ? `<span class="char-tag">${type.char} · ${type.motto}</span>` : ''}
@@ -759,6 +789,7 @@ function renderResult(){
     };
   });
 
+  app.querySelectorAll('.tilt').forEach(addTilt);
   later(()=>{ app.querySelectorAll('.gauge-pin').forEach(pin => pin.style.left = Math.min(98,Math.max(2,tol))+'%'); }, 80);
   const say = t => app.querySelectorAll('.copied').forEach(m => m.textContent = t);
   app.querySelectorAll('[data-act="again"]').forEach(b => b.onclick = () => { step = -1; render(); });
