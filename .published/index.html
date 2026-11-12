@@ -516,6 +516,33 @@ const charPic = (t, cls='') => t.img
   ? `<img class="${cls}" src="${CHAR_IMG[t.img]}" alt="${t.name} ${t.char}">`
   : `<span class="char-emoji ${cls}" role="img" aria-label="${t.name}">${t.emoji}</span>`;
 
+/* ===================== 결과 저장 (Supabase) =====================
+   설문을 끝낸 사람의 결과를 public.invest_results 에 한 줄 저장.
+   공개(publishable) 키라 페이지에 넣어도 되는 키이고, RLS로 '저장만' 허용 — 조회·수정·삭제는 불가.
+   저장에 실패해도 게임은 그대로 진행 (오프라인·차단 환경 대비). */
+const SUPABASE_URL = 'https://nezlnfkzkwpubmcsefom.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_k_N4MlX1XPdrH-kI04YB2Q_CEqGrogl';
+let resultSaved = false;   // 한 번의 설문당 한 번만 저장 (접수할 때 false로 초기화)
+const SAVE_TYPES = ['적극투자형', '공격투자형'];   // 위험선호형만 저장 (DB 보안 규칙도 이 두 유형만 허용)
+function saveResult({ sum, max, tol, type }){
+  if(resultSaved || !SAVE_TYPES.includes(type.name)) return;
+  resultSaved = true;
+  try {
+    fetch(`${SUPABASE_URL}/rest/v1/invest_results`, {
+      method: 'POST', keepalive: true,
+      headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        nickname: nickname || null,
+        type_name: type.name,
+        risk_tolerance: tol,
+        raw_score: sum,
+        max_score: max,
+        answers: answers.map((a, i) => QUESTIONS[i].opts[a][1]),
+      }),
+    }).catch(() => {});
+  } catch(e) {}
+}
+
 function score(){
   const sum = answers.reduce((s,a,i)=> s + QUESTIONS[i].opts[a][1], 0);
   const max = QUESTIONS.reduce((s,Q)=> s + Q.opts.length, 0);              // 만점 (5지선다 5점, 4지선다 4점)
@@ -566,7 +593,7 @@ function renderStart(){
       <button class="btn cta" type="submit">${ICON.bag()} 접수하기</button>
     </form>
     <div class="hint">Enter 키로도 접수할 수 있어요</div>
-    <p class="legal">게임용으로 단순화한 진단이며, 실제 투자 권유나 공식 투자성향 진단이 아닙니다.</p>
+    <p class="legal">게임용으로 단순화한 진단이며, 실제 투자 권유나 공식 투자성향 진단이 아닙니다.<br>적극·공격투자형으로 진단되면 결과(닉네임·유형·점수·답변)가 통계용으로 저장돼요.</p>
    </div>
   </div>`;
   const input = document.getElementById('nick');
@@ -576,7 +603,7 @@ function renderStart(){
     nickname = input.value.trim().slice(0, NICK_MAX);
     try { nickname ? localStorage.setItem(NICK_KEY, nickname) : localStorage.removeItem(NICK_KEY); } catch(err) {}
     app.firstElementChild.classList.add('leaving');
-    later(()=>{ step = 0; answers = []; render(); }, reduceMotion ? 0 : 320);
+    later(()=>{ step = 0; answers = []; resultSaved = false; render(); }, reduceMotion ? 0 : 320);
   };
 }
 
@@ -790,6 +817,7 @@ function renderResult(){
   });
 
   app.querySelectorAll('.tilt').forEach(addTilt);
+  saveResult({ sum, max, tol, type });
   later(()=>{ app.querySelectorAll('.gauge-pin').forEach(pin => pin.style.left = Math.min(98,Math.max(2,tol))+'%'); }, 80);
   const say = t => app.querySelectorAll('.copied').forEach(m => m.textContent = t);
   app.querySelectorAll('[data-act="again"]').forEach(b => b.onclick = () => { step = -1; render(); });
