@@ -87,6 +87,20 @@
   .cta{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;font-size:17px;padding:16px 22px;box-shadow:0 8px 22px rgba(61,191,168,.35);animation:pulse 2s ease-in-out infinite}
   .cta svg{width:20px;height:20px}
   @keyframes pulse{50%{box-shadow:0 2px 8px rgba(61,191,168,.18)}}
+  .cta.off{opacity:.45;filter:grayscale(.5);box-shadow:none;animation:none;cursor:not-allowed}
+  .cta.off:active{transform:none}
+  /* 개인정보 동의 (작게) */
+  .agree-box{margin-top:10px}
+  .agree{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--sub);cursor:pointer;user-select:none}
+  .agree input{width:15px;height:15px;margin:0;accent-color:var(--mint);cursor:pointer;flex:none}
+  .agree b{color:var(--stamp);font-weight:700}
+  .agree.shake{animation:shake .35s}
+  @keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+  details.agree-more{margin:4px 0 0 22px}
+  .agree-more summary{font-size:11px;font-weight:500;color:var(--sub)}
+  .agree-more ul{margin:4px 0 0;padding-left:16px;font-size:11px;color:var(--sub);line-height:1.6}
+  .agree-err{margin:4px 0 0 22px;font-size:11.5px;color:var(--stamp);min-height:0}
+  .agree-err:empty{display:none}
   .hint{text-align:center;font-size:12px;color:var(--sub);margin-top:10px}
   .legal{text-align:center;font-size:11.5px;color:var(--sub);opacity:.85;margin:14px 0 0;line-height:1.6}
 
@@ -342,7 +356,7 @@
     .vital-row .px b{font-size:15.5px}
   }
   @media (prefers-reduced-motion: reduce){
-    .props span,.open i,.cta,.diag-icon,.diag-title i,.ecg polyline,.diag-pills span,.stamp,.fade,.leaving,.char img{animation:none}
+    .props span,.open i,.cta,.diag-icon,.diag-title i,.ecg polyline,.diag-pills span,.stamp,.fade,.leaving,.char img,.agree.shake{animation:none}
     .tilt{transform:none!important}
     .ecg polyline{stroke-dashoffset:0}
   }
@@ -354,7 +368,7 @@
 
 <!-- 아래 블록은 collect_market.py 가 실행될 때마다 자동으로 바꿔 씀 (손으로 고치지 마세요) -->
 <!-- MARKET_DATA:START -->
-<script id="market-data" type="application/json">{"updated":"2026-11-12 20:36","source":"Yahoo Finance","series":{"069500.KS":{"name":"KODEX 200","role":"국내주식","days":[{"date":"2026-11-12","close":84240.0,"change_pct":-0.35}],"three_month":{"start_date":"2026-08-12","end_date":"2026-11-12","return_pct":-18.3}},"SPY":{"name":"SPY","role":"해외주식","days":[{"date":"2026-11-11","close":1019597.0,"usd":759.81,"change_pct":1.17}],"three_month":{"start_date":"2026-08-12","end_date":"2026-11-11","return_pct":-6.59}},"114260.KS":{"name":"KODEX 국고채3년","role":"채권","days":[{"date":"2026-11-12","close":62595.0,"change_pct":0.02}],"three_month":{"start_date":"2026-08-12","end_date":"2026-11-12","return_pct":1.29}}}}</script>
+<script id="market-data" type="application/json">{"updated":"2026-11-13 16:31","source":"Yahoo Finance","series":{"069500.KS":{"name":"KODEX 200","role":"국내주식","days":[{"date":"2026-11-12","close":84240.0,"change_pct":-0.35},{"date":"2026-11-13","close":83115.0,"change_pct":-1.34}],"three_month":{"start_date":"2026-08-13","end_date":"2026-11-13","return_pct":-22.41}},"SPY":{"name":"SPY","role":"해외주식","days":[{"date":"2026-11-11","close":1019597.0,"usd":759.81,"change_pct":1.17},{"date":"2026-11-12","close":1011709.0,"usd":757.12,"change_pct":-0.77}],"three_month":{"start_date":"2026-08-13","end_date":"2026-11-12","return_pct":-7.98}},"114260.KS":{"name":"KODEX 국고채3년","role":"채권","days":[{"date":"2026-11-12","close":62595.0,"change_pct":0.02},{"date":"2026-11-13","close":62550.0,"change_pct":-0.07}],"three_month":{"start_date":"2026-08-13","end_date":"2026-11-13","return_pct":1.16}}}}</script>
 <!-- MARKET_DATA:END -->
 
 <script>
@@ -590,16 +604,45 @@ function renderStart(){
       <div class="ticket"><span>대기번호<b>${pad(ticketNo,3)}</b></span><span>대기 0명 · 약 2분</span></div>
       <label class="f-lbl" for="nick">환자명 (닉네임)</label>
       <div class="inp">${ICON.capsule()}<input id="nick" type="text" maxlength="${NICK_MAX}" placeholder="${DEFAULT_NICK}" value="${esc(nickname)}"><small id="cnt">${nickname.length}/${NICK_MAX}</small></div>
-      <button class="btn cta" type="submit">${ICON.bag()} 접수하기</button>
+      <button class="btn cta off" type="submit" aria-disabled="true" aria-describedby="agreeErr">${ICON.bag()} 접수하기</button>
+      <div class="agree-box">
+        <label class="agree"><input type="checkbox" id="agree"><span><b>[필수]</b> 개인정보 수집·이용에 동의합니다</span></label>
+        <details class="agree-more">
+          <summary>자세히</summary>
+          <ul>
+            <li>수집 항목: 닉네임, 진단 유형·점수, 문항별 답변</li>
+            <li>수집 대상: 적극·공격투자형으로 진단된 경우만</li>
+            <li>이용 목적: 투자성향 통계 분석</li>
+            <li>보유 기간: 통계 분석이 끝나면 삭제</li>
+            <li>동의하지 않을 수 있으며, 이 경우 게임을 시작할 수 없어요.</li>
+          </ul>
+        </details>
+        <p class="agree-err" id="agreeErr" role="alert"></p>
+      </div>
     </form>
     <div class="hint">Enter 키로도 접수할 수 있어요</div>
-    <p class="legal">게임용으로 단순화한 진단이며, 실제 투자 권유나 공식 투자성향 진단이 아닙니다.<br>적극·공격투자형으로 진단되면 결과(닉네임·유형·점수·답변)가 통계용으로 저장돼요.</p>
+    <p class="legal">게임용으로 단순화한 진단이며, 실제 투자 권유나 공식 투자성향 진단이 아닙니다.</p>
    </div>
   </div>`;
   const input = document.getElementById('nick');
   input.oninput = () => { document.getElementById('cnt').textContent = `${input.value.length}/${NICK_MAX}`; };
+  // 개인정보 동의: 체크해야 접수 버튼이 켜지고, 체크 없이 누르거나 Enter 치면 안내
+  const agree = document.getElementById('agree'), agreeErr = document.getElementById('agreeErr');
+  const cta = app.querySelector('.cta');
+  agree.onchange = () => {
+    cta.classList.toggle('off', !agree.checked);
+    cta.setAttribute('aria-disabled', !agree.checked);
+    if(agree.checked) agreeErr.textContent = '';
+  };
   document.getElementById('startForm').onsubmit = (e) => {
     e.preventDefault();
+    if(!agree.checked){
+      agreeErr.textContent = '개인정보 수집·이용에 동의해야 접수할 수 있어요.';
+      const box = agree.closest('.agree');
+      box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
+      agree.focus();
+      return;
+    }
     nickname = input.value.trim().slice(0, NICK_MAX);
     try { nickname ? localStorage.setItem(NICK_KEY, nickname) : localStorage.removeItem(NICK_KEY); } catch(err) {}
     app.firstElementChild.classList.add('leaving');
