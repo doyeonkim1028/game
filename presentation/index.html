@@ -101,7 +101,9 @@
   .toc .tt{font-size:16px;font-weight:900;line-height:1.35}
   .toc .ds{font-size:12.5px;color:var(--sub);line-height:1.45}
   .toc .ic{position:absolute;right:12px;top:12px;width:26px;height:26px;color:var(--mint);opacity:.55}
-  .toc button.new::after{content:'추가';position:absolute;right:12px;bottom:12px;font-size:10.5px;font-weight:900;color:var(--stamp);border:1.5px solid var(--stamp);border-radius:6px;padding:0 5px;transform:rotate(-6deg)}
+  .card.link{display:block;color:inherit;text-decoration:none;cursor:pointer;transition:border-color .2s}
+  .card.link:hover,.card.link:focus-visible{border-color:var(--mint);outline:none}
+  .card.link .go{display:inline-block;margin-top:8px;font-size:12.5px;font-weight:900;color:var(--accent)}
   .hint{font-size:12.5px;color:var(--sub)}
   kbd{font-family:'JetBrains Mono',monospace;font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;background:var(--card)}
 
@@ -133,7 +135,7 @@
   .flow .card:not(:last-child)::after{content:'→';position:absolute;right:-13px;top:50%;transform:translateY(-50%);color:var(--mint);font-weight:900;z-index:2}
   .tabs-line{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center}
   /* 04 데모 */
-  .demo{display:grid;grid-template-columns:1.2fr 1fr;gap:16px}
+  .demo{display:grid;grid-template-columns:1fr;max-width:640px;gap:16px}
   .cta{display:inline-flex;align-items:center;gap:10px;background:var(--mint);color:var(--on-mint);font-weight:900;font-size:17px;padding:15px 24px;border-radius:14px;text-decoration:none;box-shadow:0 8px 22px rgba(61,191,168,.35);transition:transform .15s}
   .cta:hover{transform:translateY(-2px)}
   .steps{counter-reset:s;list-style:none;padding:0;margin:14px 0 0;display:flex;flex-direction:column;gap:10px}
@@ -337,8 +339,8 @@
   <div class="tabs-line rise" style="--i:7"><span class="lbl">처방전 탭</span><span class="tag">소견·처방</span><span class="tag">자산 비율</span><span class="tag">시장 바이탈</span><span class="tag">2020 시뮬레이션</span></div>
 </section>
 
-<!-- ===================== 04 (추가) ===================== -->
-<section class="slide" id="s04" data-title="라이브 데모" data-desc="청중이 직접 접수해 보기" data-new>
+<!-- ===================== 04 ===================== -->
+<section class="slide" id="s04" data-title="라이브 데모" data-desc="청중이 직접 접수해 보기">
   <span class="kicker rise">04 · 라이브 데모</span>
   <h2 class="h2 rise" style="--i:1">지금 바로 <b>접수해 보세요</b></h2>
   <p class="lead rise" style="--i:2">청중 한 명의 닉네임으로 함께 풀어보면, 결과가 나올 때 반응이 가장 좋아요.</p>
@@ -346,18 +348,8 @@
     <div class="card tilt rise" style="--i:3">
       <span class="lbl">게임 링크</span>
       <h3 style="margin-bottom:14px">나의 투자성향 진단 게임</h3>
-      <a class="cta" id="gameLink" href="https://claude.ai/artifact/Gm8u9gpsBTBxYbmpUqaV1p" target="_blank" rel="noopener">접수하러 가기 →</a>
+      <a class="cta" id="gameLink" href="https://game-sigma-nine-22.vercel.app" target="_blank" rel="noopener">접수하러 가기 →</a>
       <p class="note">링크가 열리지 않는 환경(발표장 와이파이 등)에 대비해 30초짜리 화면 녹화를 함께 준비해 두세요.</p>
-    </div>
-    <div class="card rise" style="--i:4">
-      <span class="lbl">데모 순서</span>
-      <ol class="steps">
-        <li>시작 전 "본인은 공격형일 것 같은 사람?" 손 들어보기</li>
-        <li>청중 닉네임으로 접수 → 11문항 함께 답하기</li>
-        <li>처방전의 캐릭터·도장 확인</li>
-        <li>"시장 바이탈" 탭에서 오늘 아침 숫자 보여주기</li>
-        <li>손 든 사람과 실제 결과 비교하기</li>
-      </ol>
     </div>
   </div>
 </section>
@@ -453,31 +445,9 @@
   <p class="note">2026.8.12 → 11.12 · 게임에 수집된 값(11월 12일 수집) · 배당 포함 · 예금은 연 3.21% × 92일</p>
 </section>
 
-<!-- ===================== 11 (추가) ===================== -->
-<section class="slide" id="s11" data-title="어떻게 만들었나" data-desc="데이터 흐름과 배포 구조" data-new>
-  <span class="kicker rise">11 · 어떻게 만들었나</span>
-  <h2 class="h2 rise" style="--i:1">시세는 파이썬이 모으고, <b>게임은 세 곳으로</b> 나가요</h2>
-  <p class="lead rise" style="--i:2">게임 페이지는 외부 사이트에 직접 접속할 수 없어서, 파이썬이 대신 받아 게임 안에 넣어요.</p>
-  <div class="df rise" style="--i:3">
-    <div class="card r tilt"><b>야후 파이낸스</b><span>ETF·환율 시세</span></div>
-    <div class="card r tilt"><b>파이썬</b><span>매일 4:30 수집</span></div>
-    <div class="card r tilt"><b>JSON</b><span>중간다리</span></div>
-    <div class="card main d tilt"><b>게임 index.html</b><span>JavaScript · Chart.js</span></div>
-    <div class="card tilt"><b>Supabase</b><span>적극·공격형 결과 저장</span></div>
-    <div class="card l tilt"><b>Vercel</b><span>웹 배포</span></div>
-    <div class="card l tilt"><b>GitHub</b><span>main 브랜치</span></div>
-    <div class="card l tilt"><b>Claude 링크</b><span>매일 자동 재게시</span></div>
-  </div>
-  <div class="grid g3" style="margin-top:22px">
-    <div class="card rise" style="--i:4"><span class="lbl">매일 자동</span><h3>오후 4시 30분</h3><p>수집 → 안전 확인(시세 외 변경이 있으면 멈춤) → 게임 링크 재게시</p></div>
-    <div class="card rise" style="--i:5"><span class="lbl">배포</span><h3>GitHub → Vercel</h3><p>main에 푸시하면 Vercel이 자동으로 웹에 배포해요.</p></div>
-    <div class="card rise" style="--i:6"><span class="lbl">만든 방식</span><h3>대화로 만들기</h3><p>기능을 말로 요청 → Claude가 만들고 브라우저로 테스트 → 게시를 반복했어요.</p></div>
-  </div>
-</section>
-
-<!-- ===================== 12 ===================== -->
-<section class="slide" id="s12" data-title="반응형 화면" data-desc="휴대폰·태블릿·컴퓨터">
-  <span class="kicker rise">12 · 반응형 화면</span>
+<!-- ===================== 11 ===================== -->
+<section class="slide" id="s11" data-title="반응형 화면" data-desc="휴대폰·태블릿·컴퓨터">
+  <span class="kicker rise">11 · 반응형 화면</span>
   <h2 class="h2 rise" style="--i:1">휴대폰에서도, 컴퓨터에서도 <b>편하게</b></h2>
   <div class="grid g3 dev" style="margin-top:20px">
     <div class="card tilt rise" style="--i:2"><div class="sc"><div style="width:52px;height:96px"></div></div><span class="tag">600px 이하</span><h3>휴대폰</h3><p>탭을 2×2로 배치하고, 처방전 복사·다시 접수 버튼을 화면 아래에 고정했어요.</p></div>
@@ -486,43 +456,28 @@
   </div>
 </section>
 
+<!-- ===================== 12 ===================== -->
+<section class="slide" id="s12" data-title="잠재 고객 데이터" data-desc="적극·공격투자형은 운영자가 따로 받아봐요">
+  <span class="kicker rise">12 · 잠재 고객 데이터</span>
+  <h2 class="h2 rise" style="--i:1">적극·공격투자형은 <b>운영자가 따로 받아봐요</b></h2>
+  <p class="lead rise" style="--i:2">위험을 감수하는 사람일수록 주식 거래를 많이 이용할 가능성이 커요. 그래서 이 두 유형의 결과만 모아요.</p>
+  <div class="flow">
+    <div class="card tilt rise" style="--i:3"><span class="st">STEP 1</span><span class="em">🩺</span><h3>진단 완료</h3><p>11문항에 답하면 5가지 유형 중 하나로 진단돼요.</p></div>
+    <div class="card tilt rise" style="--i:4"><span class="st">STEP 2</span><span class="em">🔍</span><h3>위험선호형만 골라요</h3><p>적극·공격투자형일 때만 저장하고, 다른 유형은 보내지 않아요.</p></div>
+    <div class="card tilt rise" style="--i:5"><span class="st">STEP 3</span><span class="em">🗄️</span><h3>데이터에 저장</h3><p>닉네임, 유형, 점수, 문항별 답변이 한 줄씩 쌓여요.</p></div>
+    <a class="card link tilt rise" style="--i:6" href="https://supabase.com/dashboard/project/nezlnfkzkwpubmcsefom/editor/17780?schema=public" target="_blank" rel="noopener"><span class="st">STEP 4</span><span class="em">📊</span><h3>운영자가 확인</h3><p>운영자는 대시보드에서 조회하고 파일로 내려받아요.</p><span class="go">대시보드 열기 ↗</span></a>
+  </div>
+  <div class="grid g2" style="margin-top:22px">
+    <div class="card tilt rise" style="--i:7"><span class="lbl" style="color:var(--accent)">왜 이 사람들인가</span><h3>주식 거래를 많이 할 잠재 고객</h3>
+      <ul class="clean" style="margin-top:10px"><li>손실을 감수하고 높은 수익을 노리는 성향</li><li>주식·ETF 거래가 잦을 가능성이 큼</li><li>증권사 입장에서 우선 공략할 고객층</li></ul></div>
+    <div class="card tilt rise" style="--i:8"><span class="lbl" style="color:var(--stamp)">개인정보는 이렇게 지켜요</span><h3>동의한 사람만, 운영자만</h3>
+      <ul class="clean" style="margin-top:10px"><li>접수 화면에서 개인정보 수집·이용에 동의해야 시작</li><li>게임 이용자는 저장만 할 수 있고 조회·수정·삭제는 불가</li><li>데이터를 볼 수 있는 건 운영자뿐</li></ul></div>
+  </div>
+</section>
+
 <!-- ===================== 13 ===================== -->
-<section class="slide" id="s13" data-title="개선 과정" data-desc="PRD 초안에서 최종 버전까지">
-  <span class="kicker rise">13 · 개선 과정</span>
-  <h2 class="h2 rise" style="--i:1">PRD 초안에서 <b>최종 버전</b>까지</h2>
-  <div class="card rise tbl" style="--i:2">
-    <table>
-      <thead><tr><th>항목</th><th>PRD 초안</th><th>최종 버전</th></tr></thead>
-      <tbody>
-        <tr><td><b>테마</b></td><td class="old">주식 차트·트레이딩 터미널</td><td class="newv">투자성향 클리닉 (접수 → 문진 → 처방)</td></tr>
-        <tr><td><b>캐릭터</b></td><td class="old">유형별 이모지</td><td class="newv">가운 입은 캐릭터 5종</td></tr>
-        <tr><td><b>문항</b></td><td class="old">10문항</td><td class="newv">11문항 (수입·목적 추가, 겹치는 질문 정리)</td></tr>
-        <tr><td><b>점수</b></td><td class="old">총점 10~50을 그대로 환산</td><td class="newv">문항별 0~1 환산 후 평균</td></tr>
-        <tr><td><b>결과 화면</b></td><td class="old">한 페이지 세로 스크롤</td><td class="newv">4개 탭 + 기기별 배치</td></tr>
-        <tr><td><b>시뮬레이션</b></td><td class="old">지수 근사치, 환율 미반영</td><td class="newv">실제 상품 가격, 원화 환산, 배당 포함</td></tr>
-        <tr><td><b>시장 데이터</b></td><td class="old">없음</td><td class="newv">시장 바이탈 탭 (야후 파이낸스)</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<!-- ===================== 14 ===================== -->
-<section class="slide" id="s14" data-title="기술과 안정성" data-desc="파일 하나로, 어디서든 안전하게">
-  <span class="kicker rise">14 · 기술과 안정성</span>
-  <h2 class="h2 rise" style="--i:1">파일 하나로, <b>어디서든 안전하게</b></h2>
-  <div class="grid g3" style="margin-top:20px">
-    <div class="card tilt rise" style="--i:2"><h3>파일 하나로 완성</h3><p>HTML·CSS·JS를 index.html 하나에 담아 빌드 없이 바로 열려요.</p></div>
-    <div class="card tilt rise" style="--i:3"><h3>그래프 실패 대비</h3><p>Chart.js를 못 불러오면 도넛은 CSS로 대신 그리고 꺾은선은 숨겨요.</p></div>
-    <div class="card tilt rise" style="--i:4"><h3>움직임 줄이기 존중</h3><p>기기에서 동작 줄이기를 켜면 애니메이션을 멈춰요.</p></div>
-    <div class="card tilt rise" style="--i:5"><h3>안전한 닉네임 표시</h3><p>입력한 닉네임은 HTML 이스케이프를 거쳐 화면에 넣어요.</p></div>
-    <div class="card tilt rise" style="--i:6"><h3>저장은 최소한으로</h3><p>닉네임은 브라우저에만 기억해요. 적극·공격투자형 결과만 통계용으로 Supabase에 저장하고, 접수 화면에 미리 알려요.</p></div>
-    <div class="card tilt rise" style="--i:7"><h3>면책 문구</h3><p>접수, 자산 비율, 시뮬레이션, 처방전 하단에 투자 권유가 아님을 밝혀요.</p></div>
-  </div>
-</section>
-
-<!-- ===================== 15 ===================== -->
-<section class="slide" id="s15" data-title="데이터 신뢰성" data-desc="실제 데이터, 솔직한 한계">
-  <span class="kicker rise">15 · 데이터 신뢰성</span>
+<section class="slide" id="s13" data-title="데이터 신뢰성" data-desc="실제 데이터, 솔직한 한계">
+  <span class="kicker rise">13 · 데이터 신뢰성</span>
   <h2 class="h2 rise" style="--i:1">숫자는 실제 데이터로, <b>한계는 솔직하게</b></h2>
   <div class="grid g2" style="margin-top:20px">
     <div class="card tilt rise" style="--i:2"><span class="lbl" style="color:var(--accent)">반영한 것</span>
@@ -533,9 +488,9 @@
   <p class="note rise" style="--i:4">게임용으로 단순화한 진단이며, 실제 투자 권유나 금융기관의 공식 투자성향 진단을 대신하지 않아요.</p>
 </section>
 
-<!-- ===================== 16 ===================== -->
-<section class="slide" id="s16" data-title="다음 단계" data-desc="앞으로 더하고 싶은 기능">
-  <span class="kicker rise">16 · 다음 단계</span>
+<!-- ===================== 14 ===================== -->
+<section class="slide" id="s14" data-title="다음 단계" data-desc="앞으로 더하고 싶은 기능">
+  <span class="kicker rise">14 · 다음 단계</span>
   <h2 class="h2 rise" style="--i:1">앞으로 <b>더하고 싶은</b> 기능</h2>
   <div class="grid g2" style="margin-top:20px">
     <div class="card tilt rise" style="--i:2"><span class="lbl">진단 모드</span><h3>빠른·정밀 모드, 스토리 모드</h3><p>상황에 맞게 문항 수를 고르고, 가상 1년 동안 뉴스에 반응하는 스토리로 진단해요.</p></div>
@@ -608,7 +563,7 @@ const img = (t, h) => CHAR_IMG[t.img] ? `<img src="${CHAR_IMG[t.img]}" alt="${t.
 /* ===================== 목차 · 이동 ===================== */
 const slides = [...document.querySelectorAll('section.slide')];
 const order = slides.map(s => s.id);
-const ICONS = ['💡','🎯','🏥','▶️','📋','🧮','🐾','💊','📉','📈','🔧','📱','🛠️','🛡️','🔍','🚀','👋'];
+const ICONS = ['💡','🎯','🏥','▶️','📋','🧮','🐾','💊','📉','📈','📱','📊','🔍','🚀','👋'];
 $('#toc').innerHTML = slides.slice(1).map((s, i) => `
   <button class="tilt rise${s.hasAttribute('data-new') ? ' new' : ''}" style="--i:${i}" data-go="${s.id}">
     <span class="ic" aria-hidden="true" style="font-size:20px;opacity:.8">${ICONS[i] || ''}</span>
